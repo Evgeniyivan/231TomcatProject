@@ -18,17 +18,6 @@ public class UserDAOImpl implements UserDAO {
     public void setSessionFactory(SessionFactory sessionFactory){
         this.sessionFactory = sessionFactory;
     }
-//    private static final AtomicInteger AUTO_ID = new AtomicInteger(0);
-//    private static final Map<Integer, User> users = new HashMap<>();
-
-//    static {
-//        User user1 = new User();
-//        user1.setId(AUTO_ID.getAndIncrement());
-//        user1.setName("Евгений");
-//        user1.setLastName("Сидоров");
-//        user1.setAge(28);
-//        users.put(user1.getId(), user1);
-//    }
 
     @Override
     @SuppressWarnings("unchecked")
