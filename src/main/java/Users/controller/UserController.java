@@ -27,18 +27,18 @@ public class UserController {
         return mav;
     }
     @RequestMapping("/new")
-    public String newCustomerForm(Map<String, Object> model) {
+    public String newUser(Map<String, Object> model) {
         User user = new User();
         model.put("user", user);
         return "newUser";
     }
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public String saveCustomer(@ModelAttribute("user") User user) {
+    public String saveUser(@ModelAttribute("user") User user) {
         userService.add(user);
         return "redirect:/";
     }
     @RequestMapping("/edit")
-    public ModelAndView editCustomerForm(@RequestParam int id) {
+    public ModelAndView editUser(@RequestParam int id) {
         ModelAndView mav = new ModelAndView("editUser");
         User user = userService.getById(id);
         mav.addObject("user", user);
@@ -46,14 +46,14 @@ public class UserController {
         return mav;
     }
         @RequestMapping(value = "/edit", method = RequestMethod.POST)
-    public ModelAndView editUser(@ModelAttribute("id") int id, User user) {
+    public ModelAndView editUserId(@ModelAttribute("id") int id, User user) {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("redirect:/");
         userService.edit(id,user);
         return modelAndView;
     }
     @RequestMapping("/delete")
-    public String deleteCustomerForm(@RequestParam int id) {
+    public String deleteUser(@RequestParam int id) {
         userService.delete(id);
         return "redirect:/";
     }
