@@ -4,19 +4,22 @@ package Users.config;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 @Configuration
-@ComponentScan(basePackages = "Users")
+//@ComponentScan(basePackages = "Users")
 @EnableTransactionManagement
 @PropertySource(value = "classpath:db.properties")
 public class AppConfig {
@@ -27,12 +30,6 @@ public class AppConfig {
       this.environment = environment;
    }
 
-   private Properties hibernateProperties() {
-      Properties properties = new Properties();
-      properties.put("hibernate.dialect", environment.getRequiredProperty("hibernate.dialect"));
-      properties.put("hibernate.show_sql", environment.getRequiredProperty("hibernate.show_sql"));
-      return properties;
-   }
 
    @Bean
    public DataSource dataSource() {
@@ -44,19 +41,45 @@ public class AppConfig {
       return dataSource;
    }
 
-   @Bean
-   public LocalSessionFactoryBean sessionFactory() {
-      LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-      sessionFactory.setDataSource(dataSource());
-      sessionFactory.setPackagesToScan("Users.model");
-      sessionFactory.setHibernateProperties(hibernateProperties());
-      return sessionFactory;
-   }
+//   @Bean
+//   public LocalSessionFactoryBean sessionFactory() {
+//      LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+//      sessionFactory.setDataSource(dataSource());
+//      sessionFactory.setPackagesToScan("Users.model");
+//      sessionFactory.setHibernateProperties(hibernateProperties());
+//      return sessionFactory;
+//   }
 
+//   @Bean
+//   public HibernateTransactionManager transactionManager() {
+//      HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+//      transactionManager.setSessionFactory(sessionFactory().getObject());
+//      return transactionManager;
+//   }
    @Bean
-   public HibernateTransactionManager transactionManager() {
-      HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-      transactionManager.setSessionFactory(sessionFactory().getObject());
+   public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+      LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+      em.setDataSource(dataSource());
+      em.setPackagesToScan(environment.getRequiredProperty("db.entity.package"));
+      em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+      em.setJpaProperties(getHibernateProperties());
+      return em;
+   }
+   @Bean
+   public Properties getHibernateProperties() {
+      Properties properties = new Properties();
+      try {
+         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("hibernate.properties");
+         properties.load(inputStream);
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+      return properties;
+   }
+   @Bean
+   public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+      JpaTransactionManager transactionManager = new JpaTransactionManager();
+      transactionManager.setEntityManagerFactory(entityManagerFactory);
       return transactionManager;
    }
 }
