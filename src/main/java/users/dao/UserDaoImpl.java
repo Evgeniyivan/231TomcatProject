@@ -1,6 +1,6 @@
-package Users.dao;
+package users.dao;
 
-import Users.model.User;
+import users.model.User;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @Repository
-public class UserDAOImpl implements UserDAO {
+public class UserDaoImpl implements UserDao {
 //
 //    private SessionFactory sessionFactory;
 //
@@ -51,38 +51,38 @@ public class UserDAOImpl implements UserDAO {
 @PersistenceContext
 private EntityManager entityManager;
 
+
     @Override
-    public void add(User user) {
-        entityManager.persist(user);
+    public List<User> getAllUsers() {
+        return entityManager.createQuery("from User", User.class).getResultList();
     }
 
     @Override
-    public User getById(int id) {
+    public User getById(Long id) {
         return entityManager.find(User.class, id);
     }
 
     @Override
-    public List<User> allUsers() {
-        return entityManager.createQuery("from User",User.class).getResultList();
+    public void save(User user) {
+        entityManager.persist(user);
     }
 
     @Override
-    public void edit(int id,User user) {
-        User userToBeUpdated = entityManager.find(User.class, id);
-
-        userToBeUpdated.setFirstName(user.getFirstName());
-        userToBeUpdated.setLastName(user.getLastName());
-        userToBeUpdated.setAge(user.getAge());
-        userToBeUpdated.setEmail(user.getEmail());
-
+    public void update(User updatedUser) {
+        entityManager.merge(updatedUser);
     }
 
     @Override
-    public void delete(int id) {
-        entityManager.remove(entityManager.getReference(User.class, id));
+    public void delete(Long id) {
+        User user = entityManager.find(User.class, id);
+        entityManager.remove(user);
     }
 
-
+    @Override
+    public User getByLogin(String email) {
+        return entityManager.createQuery("SELECT user FROM User user WHERE user.email=:email", User.class)
+                .setParameter("email", email).getSingleResult();
+    }
 }
 
 
